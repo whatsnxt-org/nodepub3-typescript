@@ -1,0 +1,30 @@
+/* Visit https://aka.ms/tsconfig.json to read more about this file */
+{
+  "compilerOptions": {
+    /* Language and Environment */
+    "target": "ESNext",
+    "lib": ["ESNext"],
+
+    /* Modules */
+    "moduleResolution": "node",
+    "baseUrl": ".",
+
+    /* JavaScript Support */
+    "sourceMap": true,
+    "outDir": "./dist",
+
+    /* Interop Constraints */
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+
+    /* Type Checking */
+    "strict": true,
+    "noImplicitThis": true,
+    "declaration": true,
+
+    /* Completeness */
+    "skipLibCheck": true
+  },
+  "files": ["node_modules/jest-extended/types/index.d.ts"],
+  "include": ["src/**/*", "test/**/*"]
+}

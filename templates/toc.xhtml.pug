@@ -1,0 +1,24 @@
+mixin chapterTree(tree)
+  if tree.length > 0
+    ul
+      each item in tree
+        li
+          a(href='c' + item.position + '.xhtml') #{item.title}
+          +chapterTree(item.children)
+
+doctype xml
+- var lang = document.metadata.language
+html(
+  xmlns='http://www.w3.org/1999/xhtml',
+  xmlns:epub='http://www.idpf.org/2007/ops',
+  xml:lang=lang
+)
+  head
+    - var title = document.metadata.contentChapterTitle
+    - title = title ? title : lang == 'zh' ? '目录' : 'Table of Contents'
+    title #{title}
+    link(rel='stylesheet', type='text/css', href='../style.css')/
+    meta(http-equiv='Content-Type', content='text/html; charset=utf-8')/
+  body(dir=document.metadata.rtl ? 'rtl' : undefined)
+    h1 #{title}
+    +chapterTree(utils.getChapterTree(document.chapters))

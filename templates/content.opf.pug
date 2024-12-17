@@ -1,0 +1,74 @@
+mixin dcMeta(refines, data)
+  if data
+    each metaData, property in data
+      if metaData
+        if typeof metaData === 'object'
+          meta(refines=refines, property=property)&attributes(metaData.attribute) #{metaData.value}
+        else
+          meta(refines=refines, property=property) #{metaData}
+
+mixin dcTag(tag, data)
+  if data
+    if Array.isArray(data)
+      each dcData, i in data
+        if typeof dcData === 'object'
+          - var pt = (i + 1).toString().padStart(2, '0')
+          #{'dc:' + tag}(id=tag + pt)&attributes(dcData.attribute) #{dcData.value}
+          +dcMeta(tag + pt, dcData.meta)
+        else
+          #{'dc:' + tag} #{dcData}
+    else
+      - var dcData = data
+      if typeof dcData === 'object'
+        #{'dc:' + tag}(id=tag)&attributes(dcData.attribute) #{dcData.value}
+        +dcMeta(tag, dcData.meta)
+      else
+        #{'dc:' + tag} #{dcData}
+
+doctype xml
+package(
+  xmlns='http://www.idpf.org/2007/opf',
+  version='3.0',
+  unique-identifier='pub-id',
+  dir=document.metadata.rtl ? 'rtl' : undefined
+)
+  metadata(
+    xmlns:opf='http://www.idpf.org/2007/opf',
+    xmlns:dc='http://purl.org/dc/elements/1.1/',
+    xmlns:dcterms='http://purl.org/dc/terms/',
+    xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+  )
+    dc:identifier(id='pub-id') urn:#{document.metadata.id ? document.metadata.id : 'uuid:' + utils.uuid()}
+    +dcTag('title', document.metadata.title)
+    +dcTag('language', document.metadata.language)
+    +dcTag('description', document.metadata.description)
+    +dcTag('creator', document.metadata.creator)
+    +dcTag('contributor', document.metadata.contributor)
+    +dcTag('subject', document.metadata.subject)
+    +dcTag('publisher', document.metadata.publisher)
+    +dcTag('date', document.metadata.publicationDate ? document.metadata.publicationDate.toISOString() : undefined)
+    +dcTag('rights', document.metadata.copyright)
+    +dcTag('source', document.metadata.source)
+    +dcTag('type', document.metadata.type)
+    meta(name='cover', content='cover')
+    meta(property='dcterms:modified') #{new Date().toISOString()}
+  manifest
+    item(id='cover', href=document.metadata.cover.name, properties='cover-image', media-type=utils.getMimeType(document.metadata.cover))
+    item(id='css', href='style.css', media-type='text/css')
+    item(id='nav', href='nav.xhtml', properties='nav', media-type='application/xhtml+xml')
+    unless document.metadata.disableCoverChapter
+      item(id='cover_page', href='cover_page.xhtml', media-type='application/xhtml+xml')
+    unless document.metadata.disableContentChapter
+      item(id='toc', href='text/toc.xhtml', media-type='application/xhtml+xml')
+    each item, i in document.chapters
+      - var id = 'c' + (i + 1)
+      item(id=id, href='text/' + id + '.xhtml', media-type='application/xhtml+xml')
+    each item in document.resources
+      item(href='res/' + item.name, media-type=utils.getMimeType(item))
+  spine
+    unless document.metadata.disableCoverChapter
+      itemref(idref='cover_page')
+    unless document.metadata.disableContentChapter
+      itemref(idref='toc')
+    each item, i in document.chapters
+      itemref(idref='c' + (i + 1))

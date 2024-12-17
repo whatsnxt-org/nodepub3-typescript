@@ -1,0 +1,33 @@
+mixin chapterTree(tree)
+  if tree.length > 0
+    ol
+      each item in tree
+        li
+          a(href='text/c' + item.position + '.xhtml') #{item.title}
+          +chapterTree(item.children)
+
+doctype xml
+- var lang = document.metadata.language
+html(
+  xmlns='http://www.w3.org/1999/xhtml',
+  xmlns:epub='http://www.idpf.org/2007/ops',
+  xml:lang=lang
+)
+  head
+    title #{lang == 'zh' ? '导航' : 'Navigation'}
+    meta(http-equiv='Content-Type', content='text/html; charset=utf-8')/
+  body
+    nav(epub:type='toc')
+      ol
+        unless document.metadata.disableCoverChapter
+          li
+            - var title = document.metadata.coverChapterTitle
+            a(href='cover_page.xhtml') #{title ? title : lang == 'zh' ? '封面' : 'Cover'}
+        unless document.metadata.disableContentChapter
+          li
+            - var title = document.metadata.contentChapterTitle
+            a(href='text/toc.xhtml') #{title ? title : lang == 'zh' ? '目录' : 'Table of Contents'}
+        each item in utils.getChapterTree(document.chapters)
+          li
+            a(href='text/c' + item.position + '.xhtml') #{item.title}
+            +chapterTree(item.children)
